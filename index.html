@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MailShield — Agentic AI Email Security Studio</title>
+  <meta name="description" content="Autonomous Agentic AI security sentry powered by TypeSafe Jev & Cloudflare Clef decision models. Instant snapshot paste analysis with sub-25ms zero-token inference.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="agentic-mode">
+  
+  <!-- LIVING NEURAL PARTICLES & ENERGY CANVAS (Hardware-Accelerated 60fps) -->
+  <canvas id="neural-canvas" class="neural-canvas"></canvas>
+  
+  <!-- LIVING DUAL AMBIENT AURORA (Pitch Black base, Zero Blue Hue) -->
+  <div class="living-ambient-primary" id="living-ambient-primary"></div>
+  <div class="living-ambient-secondary" id="living-ambient-secondary"></div>
+
+  <div class="studio-wrapper">
+    
+    <!-- Clean, Unified Top Nav Bar -->
+    <header class="studio-header">
+      <div class="header-left">
+        <div class="ai-core-orb" id="ai-core-orb">
+          <div class="core-pulse"></div>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          </svg>
+        </div>
+        <div class="brand-block">
+          <span class="app-name">MailShield</span>
+          <div class="agent-live-tag">
+            <span class="live-dot"></span>
+            <span>Agent Sentry Active</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Center Scenario Switcher Pills -->
+      <nav class="scenario-dock">
+        <button class="dock-btn active" data-scenario="chase_bank">
+          <span class="status-indicator danger"></span>
+          <span>Chase Bank</span>
+        </button>
+        <button class="dock-btn" data-scenario="ceo_wire">
+          <span class="status-indicator danger"></span>
+          <span>CEO Wire</span>
+        </button>
+        <button class="dock-btn" data-scenario="geek_squad">
+          <span class="status-indicator warning"></span>
+          <span>$499 Invoice</span>
+        </button>
+        <button class="dock-btn" data-scenario="usps_redelivery">
+          <span class="status-indicator warning"></span>
+          <span>USPS Fee</span>
+        </button>
+        <button class="dock-btn" data-scenario="legit_allhands">
+          <span class="status-indicator safe"></span>
+          <span>Work All-Hands</span>
+        </button>
+        <button class="dock-btn upload-btn" id="btn-dock-paste" title="Paste your own snapshot">
+          <span class="icon">📋</span>
+          <span>Paste Snapshot (<kbd>Ctrl+V</kbd>)</span>
+        </button>
+      </nav>
+
+      <!-- Right Telemetry & Settings -->
+      <div class="header-right">
+        <div class="latency-badge" title="TypeSafe Jev logit latency">
+          <span class="latency-dot"></span>
+          <span id="latency-val">24ms</span>
+        </div>
+        <button class="icon-btn" id="btn-toggle-json" title="View Decision Model Schema">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="16 18 22 12 16 6"/>
+            <polyline points="8 6 2 12 8 18"/>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Workspace Studio (Clean, Spacious Split Screen) -->
+    <main class="studio-workspace">
+      
+      <!-- LEFT: Snapshot Inspector (Clean, uncluttered, focused) -->
+      <section class="stage-panel" id="stage-panel">
+        <div class="glass-card snapshot-card" id="snapshot-card">
+
+          <!-- Window Header Chrome -->
+          <div class="window-chrome">
+            <div class="window-controls">
+              <span class="control close"></span>
+              <span class="control min"></span>
+              <span class="control max"></span>
+            </div>
+            <div class="window-title" id="window-title">
+              <span>chase_security_alert.png</span>
+            </div>
+            <div class="window-actions">
+              <label for="hidden-file-input" class="btn-micro" title="Upload new snapshot">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                  <polyline points="17 8 12 3 7 8"/>
+                  <line x1="12" y1="3" x2="12" y2="15"/>
+                </svg>
+                <span>Upload</span>
+              </label>
+              <input type="file" id="hidden-file-input" accept="image/*" class="sr-only">
+            </div>
+          </div>
+
+          <!-- Snapshot Image Frame -->
+          <div class="snapshot-frame" id="snapshot-frame">
+            <img id="stage-image" src="assets/chase_bank_alert.png" alt="Email Snapshot">
+            
+            <!-- Continuous Subtle Laser Scan Beam -->
+            <div class="scan-beam" id="scan-beam"></div>
+
+            <!-- Threat Pins Overlaid on Image -->
+            <div class="threat-pins-layer" id="threat-pins-layer">
+              <!-- Dynamically populated pins -->
+            </div>
+
+            <!-- Drag & Drop Overlay -->
+            <div class="drop-overlay hidden" id="drop-overlay">
+              <div class="drop-modal">
+                <div class="drop-icon">📸</div>
+                <h3>Drop Email Snapshot Here</h3>
+                <p>Jev neural engine will scan in 24ms</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bottom Status Bar with Subtle Live Agent Reasoning -->
+          <div class="snapshot-footer">
+            <div class="agent-live-reasoning">
+              <span class="pulse-icon">⚡</span>
+              <span class="thought-text" id="thought-text">Autonomous neural scan locked on JPMorgan Chase header signatures...</span>
+            </div>
+            <button class="btn-text-mode" id="btn-text-mode">Paste text</button>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- RIGHT: Unified Decision Intelligence Dossier (ONE cohesive card, zero congestion) -->
+      <section class="intel-panel" id="intel-panel">
+        
+        <div class="glass-card dossier-card" id="verdict-hero">
+          
+          <!-- Dossier Top: Verdict Header -->
+          <div class="dossier-header">
+            <div class="verdict-status-row">
+              <span class="threat-badge" id="threat-badge">🚨 MALICIOUS PHISHING</span>
+              <span class="certainty-tag" id="certainty-pill">99.4% Jev Certainty</span>
+            </div>
+            <div class="score-pill" id="score-pill">
+              <span class="score-label">Threat Risk</span>
+              <span class="score-val" id="risk-score">98%</span>
+            </div>
+          </div>
+
+          <!-- Headline & Summary -->
+          <div class="dossier-intro">
+            <h2 class="verdict-heading" id="verdict-heading">
+              Fake Bank Account Suspension
+            </h2>
+            <p class="verdict-summary" id="verdict-summary">
+              This email is pretending to be Chase Bank to panic you into giving away your password on a fake website. Do not click the link or provide any information.
+            </p>
+          </div>
+
+          <!-- Threat Meter Line -->
+          <div class="meter-track">
+            <div class="meter-fill" id="meter-fill" style="width: 98%;"></div>
+          </div>
+
+          <!-- Clean 3-Item Plain-English Breakdown (No card-in-card clutter) -->
+          <div class="dossier-breakdown">
+            
+            <div class="breakdown-item">
+              <div class="item-label">
+                <span class="item-icon">🎯</span>
+                <span>WHAT IT IS</span>
+              </div>
+              <p class="item-value" id="pillar-what">
+                Bank Credential Phishing Attack disguised as a security alert.
+              </p>
+            </div>
+
+            <div class="breakdown-item">
+              <div class="item-label">
+                <span class="item-icon">🧠</span>
+                <span>THE TRICK</span>
+              </div>
+              <p class="item-value" id="pillar-trick">
+                Artificial Panic & Urgency: Claims your account is restricted with a 24-hour deadline to act.
+              </p>
+            </div>
+
+            <div class="breakdown-item action-highlight" id="pillar-action-card">
+              <div class="item-label">
+                <span class="item-icon">🛡️</span>
+                <span>RECOMMENDED ACTION</span>
+              </div>
+              <p class="item-value" id="pillar-action">
+                Delete this email immediately. Never click the link. If concerned about your account, open the official Chase app directly.
+              </p>
+            </div>
+
+          </div>
+
+          <!-- Caught Signals Section (Streamlined) -->
+          <div class="dossier-signals">
+            <div class="signals-header">
+              <span class="signals-title">CAUGHT DECEPTIVE SIGNALS</span>
+              <span class="signals-count" id="signals-count">3 Signals</span>
+            </div>
+            <div class="signals-list" id="signals-list">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+
+          <!-- Action Footer -->
+          <div class="dossier-footer">
+            <button class="btn-action primary" id="btn-copy-report">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+              </svg>
+              <span id="btn-copy-text">Copy Incident Report</span>
+            </button>
+
+            <button class="btn-action secondary" id="btn-paste-new">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 5v14M5 12h14"/>
+              </svg>
+              <span>Scan New</span>
+            </button>
+          </div>
+
+        </div>
+
+      </section>
+
+    </main>
+
+    <!-- Slide-over Technical Schema Drawer -->
+    <div class="tech-drawer hidden" id="tech-drawer">
+      <div class="drawer-header">
+        <div class="drawer-title">
+          <span class="code-tag">{ }</span>
+          <h3>Jev / Clef-Flash Decision Schema</h3>
+        </div>
+        <button class="btn-close-drawer" id="btn-close-drawer">✕</button>
+      </div>
+      <div class="drawer-body">
+        <div class="tech-specs">
+          <div><strong>Model:</strong> <code>@cf/cloudflare/clef-flash (9B)</code></div>
+          <div><strong>Architecture:</strong> <code>System One Logit Evaluation</code></div>
+          <div><strong>Latency:</strong> <code id="drawer-latency">24ms</code></div>
+          <div><strong>Compute Charge:</strong> <code>$0.00 (Zero Token Generation)</code></div>
+        </div>
+        <pre><code id="drawer-json"></code></pre>
+      </div>
+    </div>
+
+    <!-- Text Input Modal -->
+    <div class="modal-backdrop hidden" id="text-modal">
+      <div class="modal-window">
+        <div class="modal-header">
+          <h3>Paste Raw Email Text</h3>
+          <button class="btn-close-modal" id="btn-close-text-modal">✕</button>
+        </div>
+        <div class="modal-body">
+          <textarea id="modal-textarea" rows="7" placeholder="Paste email subject, headers, and body here..."></textarea>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-action secondary" id="btn-cancel-modal">Cancel</button>
+          <button class="btn-action primary" id="btn-submit-text">Audit with Jev</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
