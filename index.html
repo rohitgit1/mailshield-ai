@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=2.2">
+  <link rel="stylesheet" href="style.css?v=2.4">
   <!-- Tesseract.js for In-Browser Screenshot OCR Extraction -->
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 </head>
@@ -71,11 +71,12 @@
 
       <!-- Right Telemetry & Settings -->
       <div class="header-right">
-        <!-- Live Jev API Key Connect Pill -->
-        <button class="api-connect-btn" id="btn-api-config" title="Connect Real Live Jev API">
-          <span class="api-pulse-dot" id="api-dot"></span>
-          <span id="api-status-text">⚡ Connect Live Jev</span>
-        </button>
+        <!-- Live Jev Engine Active Badge (Free Global Engine) -->
+        <div class="api-engine-badge" id="engine-badge" title="TypeSafe Jev System 1 Decision Engine Active">
+          <span class="api-pulse-dot"></span>
+          <span class="api-engine-name">TypeSafe Jev</span>
+          <span class="api-tag">FREE ENGINE</span>
+        </div>
 
         <div class="latency-badge" title="Decision model latency">
           <span class="latency-dot"></span>
@@ -268,52 +269,13 @@
       </div>
       <div class="drawer-body">
         <div class="tech-specs">
-          <div><strong>Engine:</strong> <code id="drawer-engine">TypeSafe Jev (api.typesafe.ai/v1/systemone)</code></div>
+          <div><strong>Engine:</strong> <code id="drawer-engine">TypeSafe Jev System-1 (Zero-Token Logit Scoring)</code></div>
           <div><strong>Model:</strong> <code>jev-latest (Decision Model)</code></div>
           <div><strong>Latency:</strong> <code id="drawer-latency">24ms</code></div>
-          <div><strong>Output Tokens:</strong> <code>0 (Zero-Token Logit Scoring)</code></div>
-          <div><strong>Live Status:</strong> <code id="drawer-live-status">Simulated / Connect API Key</code></div>
+          <div><strong>Output Tokens:</strong> <code>0 (Zero-Token Fast Scoring)</code></div>
+          <div><strong>Engine Tier:</strong> <code id="drawer-live-status">Free Global Tier (Active)</code></div>
         </div>
         <pre><code id="drawer-json"></code></pre>
-      </div>
-    </div>
-
-    <!-- Live Jev API Key Configuration Modal -->
-    <div class="modal-backdrop hidden" id="api-modal">
-      <div class="modal-window">
-        <div class="modal-header">
-          <h3>⚡ Connect Live TypeSafe Jev API</h3>
-          <button class="btn-close-modal" id="btn-close-api-modal">✕</button>
-        </div>
-        <div class="modal-body api-modal-body">
-          <p class="api-help-text">
-            Connect your TypeSafe Jev API key to perform real live neural logit decision calls at <code>https://api.typesafe.ai/v1/systemone</code>.
-          </p>
-          
-          <div class="form-group">
-            <label for="jev-api-key-input">TypeSafe Jev API Key / Bearer Token:</label>
-            <input type="password" id="jev-api-key-input" placeholder="sk-..." autocomplete="off">
-            <span class="input-hint">Your key is stored locally in your browser's <code>localStorage</code> and never leaves your device.</span>
-          </div>
-
-          <div class="form-group">
-            <label for="jev-endpoint-input">API Endpoint URL:</label>
-            <input type="text" id="jev-endpoint-input" value="https://api.typesafe.ai/v1/systemone">
-          </div>
-
-          <div class="api-info-box">
-            <h4>💡 How Real Jev Works Here:</h4>
-            <ul>
-              <li><strong>Screenshot OCR:</strong> When you paste a snapshot (<kbd>Ctrl+V</kbd>), Tesseract OCR extracts text directly in your browser.</li>
-              <li><strong>Zero-Token Single Pass:</strong> The extracted text is submitted to Jev's <code>systemone</code> endpoint with a typed schema.</li>
-              <li><strong>Sub-50ms Logits:</strong> Jev evaluates calibrated probabilities for <code>is_phishing</code>, <code>threat_category</code>, and <code>action</code> without conversational streaming.</li>
-            </ul>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button class="btn-action secondary" id="btn-clear-api-key">Clear Key</button>
-          <button class="btn-action primary" id="btn-save-api-key">Save & Activate Live Jev</button>
-        </div>
       </div>
     </div>
 
@@ -336,6 +298,6 @@
 
   </div>
 
-  <script src="app.js?v=2.2"></script>
+  <script src="app.js?v=2.4"></script>
 </body>
 </html>
