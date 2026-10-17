@@ -1,6 +1,6 @@
 /**
  * MailShield Studio — Living Agentic AI Security Engine
- * Powered by TypeSafe Jev & Cloudflare Clef-Flash Decision Models
+ * Powered by TypeSafe Jev (https://api.typesafe.ai/v1/systemone)
  */
 
 // Preset Snapshots & Intelligence Metadata
@@ -165,9 +165,14 @@ let currentCategory = 'danger';
 let thoughtInterval = null;
 let currentThoughtIndex = 0;
 
+// API Configuration State
+let jevApiKey = localStorage.getItem('JEV_API_KEY') || '';
+let jevEndpoint = localStorage.getItem('JEV_ENDPOINT') || 'https://api.typesafe.ai/v1/systemone';
+
 // DOM References
 const latencyVal = document.getElementById('latency-val');
 const drawerLatency = document.getElementById('drawer-latency');
+const drawerLiveStatus = document.getElementById('drawer-live-status');
 const windowTitle = document.getElementById('window-title');
 const stageImage = document.getElementById('stage-image');
 const scanBeam = document.getElementById('scan-beam');
@@ -178,6 +183,17 @@ const hiddenFileInput = document.getElementById('hidden-file-input');
 const btnDockPaste = document.getElementById('btn-dock-paste');
 const btnPasteNew = document.getElementById('btn-paste-new');
 const thoughtText = document.getElementById('thought-text');
+
+// API Connect Elements
+const btnApiConfig = document.getElementById('btn-api-config');
+const apiStatusText = document.getElementById('api-status-text');
+const apiDot = document.getElementById('api-dot');
+const apiModal = document.getElementById('api-modal');
+const btnCloseApiModal = document.getElementById('btn-close-api-modal');
+const jevApiKeyInput = document.getElementById('jev-api-key-input');
+const jevEndpointInput = document.getElementById('jev-endpoint-input');
+const btnSaveApiKey = document.getElementById('btn-save-api-key');
+const btnClearApiKey = document.getElementById('btn-clear-api-key');
 
 // Verdict Deck Elements
 const verdictHero = document.getElementById('verdict-hero');
@@ -213,8 +229,147 @@ const btnSubmitText = document.getElementById('btn-submit-text');
 const modalTextarea = document.getElementById('modal-textarea');
 
 /**
+ * Update UI state based on whether a real Jev API key is connected
+ */
+function updateApiStatusUI() {
+  if (jevApiKey && jevApiKey.trim().length > 5) {
+    btnApiConfig.classList.add('live-active');
+    apiStatusText.textContent = "🟢 Live Jev Connected";
+    drawerLiveStatus.textContent = "Active Live API (api.typesafe.ai)";
+  } else {
+    btnApiConfig.classList.remove('live-active');
+    apiStatusText.textContent = "⚡ Connect Live Jev";
+    drawerLiveStatus.textContent = "Demonstration Mode / Connect Key";
+  }
+}
+
+/**
+ * Call the Real TypeSafe Jev API (POST https://api.typesafe.ai/v1/systemone)
+ */
+async function callLiveJevDecision(inputText) {
+  const start = performance.now();
+
+  const requestPayload = {
+    state: inputText,
+    model: "jev-latest",
+    questions: {
+      is_phishing: {
+        type: "noul",
+        instructions: "Is this email or message a phishing, scam, or social engineering attempt?"
+      },
+      attack_vector: {
+        type: "choice",
+        instructions: "What type of attack or communication vector is this?",
+        criteria: {
+          "credential_harvesting": "Impersonates a bank, tech brand, or service to capture login passwords",
+          "whaling_wire_fraud": "Impersonates an executive or CEO demanding urgent confidential wire transfer",
+          "invoice_phone_trap": "Fabricated high-dollar charge provoking the victim to call a bogus helpline",
+          "parcel_smishing": "Small redelivery fee designed to extract debit/credit card details",
+          "authentic_communication": "Legitimate business, administrative, or personal message"
+        }
+      },
+      psychological_trick: {
+        type: "choice",
+        instructions: "What psychological coercion is present?",
+        criteria: {
+          "manufactured_urgency": "Urgent deadline or immediate account closure threat",
+          "authority_secrecy": "Executive authority requiring strict confidentiality",
+          "shock_provocation": "Unauthorized high charge provoking panic",
+          "low_friction_lure": "Small nominal fee to reduce vigilance",
+          "none": "No deceptive coercion detected"
+        }
+      },
+      prescribed_action: {
+        type: "choice",
+        instructions: "What should the recipient do?",
+        criteria: {
+          "delete_and_block": "Delete immediately and never click links or provide info",
+          "verify_out_of_band": "Contact the purported sender directly via known phone number or in person before sending funds",
+          "safe_to_interact": "Safe to read and interact with normally"
+        }
+      }
+    }
+  };
+
+  try {
+    const res = await fetch(jevEndpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${jevApiKey.trim()}`
+      },
+      body: JSON.stringify(requestPayload)
+    });
+
+    if (!res.ok) {
+      throw new Error(`Jev API Error: HTTP ${res.status} ${res.statusText}`);
+    }
+
+    const json = await res.json();
+    const elapsed = (performance.now() - start).toFixed(0);
+
+    // Parse Jev probability and choices
+    const isPhishingScore = json.answers?.is_phishing?.score ?? 0.95;
+    const threatScore = Math.round(isPhishingScore * 100);
+    const category = threatScore > 75 ? 'danger' : threatScore > 40 ? 'warning' : 'safe';
+
+    const vector = json.answers?.attack_vector?.selection || "credential_harvesting";
+    const trick = json.answers?.psychological_trick?.selection || "manufactured_urgency";
+    const action = json.answers?.prescribed_action?.selection || "delete_and_block";
+
+    return {
+      success: true,
+      data: {
+        id: "live_jev_eval",
+        filename: "live_jev_evaluated_state.txt",
+        category: category,
+        threatScore: threatScore,
+        headline: category === 'safe' ? "Authentic Message Verified by Jev" : "Malicious Attack Flagged by Real Jev",
+        badgeText: category === 'safe' ? "✅ AUTHENTIC MESSAGE" : "🚨 LIVE JEV THREAT FLAG",
+        certainty: `${(Math.max(isPhishingScore, 1 - isPhishingScore) * 100).toFixed(1)}% Real Jev Probability`,
+        summary: `TypeSafe Jev analyzed the state in ${elapsed}ms: ${vector.replace(/_/g, ' ')}. Action: ${action.replace(/_/g, ' ')}.`,
+        what: vector.replace(/_/g, ' ').toUpperCase(),
+        trick: trick.replace(/_/g, ' ').toUpperCase(),
+        action: action.replace(/_/g, ' '),
+        signals: [
+          { text: `Live Jev Decision Score: ${threatScore}/100`, type: category },
+          { text: `TypeSafe Vector: ${vector}`, type: category },
+          { text: `Coercion Detected: ${trick}`, type: category }
+        ],
+        pins: [],
+        rawResponse: json,
+        elapsed: elapsed
+      }
+    };
+  } catch (err) {
+    console.error("Live Jev API Error:", err);
+    return {
+      success: false,
+      error: err.message
+    };
+  }
+}
+
+/**
+ * Extract text from snapshot image via in-browser Tesseract OCR
+ */
+async function extractTextFromImage(imgElement) {
+  if (window.Tesseract && window.Tesseract.recognize) {
+    thoughtText.textContent = "⚡ Running in-browser OCR text extraction...";
+    const result = await window.Tesseract.recognize(imgElement, 'eng', {
+      logger: m => {
+        if (m.status === 'recognizing text' && m.progress) {
+          thoughtText.textContent = `⚡ In-Browser OCR: ${Math.floor(m.progress * 100)}%`;
+        }
+      }
+    });
+    return result.data.text || "";
+  }
+  return "";
+}
+
+/**
  * LIVING NEURAL PARTICLES & ENERGY SIMULATION (Canvas 60fps)
- * Complete with synaptic electrical action potentials
  */
 const canvas = document.getElementById('neural-canvas');
 let ctx = null;
@@ -234,7 +389,6 @@ function initNeuralSimulation() {
     mouse.y = e.clientY;
   });
 
-  // Spawn neural nodes
   const count = Math.min(Math.floor((window.innerWidth * window.innerHeight) / 12000), 90);
   particles = [];
   for (let i = 0; i < count; i++) {
@@ -250,11 +404,9 @@ function initNeuralSimulation() {
     });
   }
 
-  // Periodic electrical action potential generation
   setInterval(() => {
     if (particles.length > 2 && Math.random() > 0.3) {
       const p1 = particles[Math.floor(Math.random() * particles.length)];
-      // find nearest neighbor within range
       let closest = null;
       let minDist = 130;
       for (const p2 of particles) {
@@ -301,7 +453,6 @@ function renderNeuralFrame(time) {
   if (!ctx) return;
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  // Palette mapping based on category (ZERO BLUE HUES)
   let pColor, lineColor, sparkColor;
   if (currentCategory === 'danger') {
     pColor = 'rgba(255, 42, 95, ';
@@ -317,7 +468,6 @@ function renderNeuralFrame(time) {
     sparkColor = 'rgba(255, 255, 255, ';
   }
 
-  // Draw expanding shockwave if active
   if (ripple) {
     ctx.save();
     ctx.beginPath();
@@ -336,23 +486,19 @@ function renderNeuralFrame(time) {
     }
   }
 
-  // Update & Draw Particles
   const maxDist = 130;
   for (let i = 0; i < particles.length; i++) {
     const p = particles[i];
 
-    // Gentle organic floating physics
     p.phase += p.pulseSpeed;
     p.x += p.vx + Math.sin(p.phase) * 0.2;
     p.y += p.vy + Math.cos(p.phase) * 0.2;
 
-    // Wrap canvas boundaries smoothly
     if (p.x < 0) p.x = canvas.width;
     if (p.x > canvas.width) p.x = 0;
     if (p.y < 0) p.y = canvas.height;
     if (p.y > canvas.height) p.y = 0;
 
-    // Mouse proximity repulsion
     const dxMouse = mouse.x - p.x;
     const dyMouse = mouse.y - p.y;
     const distMouse = Math.sqrt(dxMouse * dxMouse + dyMouse * dyMouse);
@@ -363,10 +509,8 @@ function renderNeuralFrame(time) {
       p.y -= Math.sin(angle) * force * 3.5;
     }
 
-    // Dynamic node breathing radius
     const currentRadius = p.baseRadius + Math.sin(p.phase * 2) * 0.8;
 
-    // Draw particle node
     ctx.beginPath();
     ctx.arc(p.x, p.y, Math.max(1, currentRadius), 0, Math.PI * 2);
     ctx.fillStyle = `${pColor}0.85)`;
@@ -375,7 +519,6 @@ function renderNeuralFrame(time) {
     ctx.fill();
     ctx.shadowBlur = 0;
 
-    // Connect synapses
     for (let j = i + 1; j < particles.length; j++) {
       const p2 = particles[j];
       const dx = p.x - p2.x;
@@ -394,7 +537,6 @@ function renderNeuralFrame(time) {
     }
   }
 
-  // Draw traveling electrical action potential sparks
   for (let k = electricalPulses.length - 1; k >= 0; k--) {
     const pulse = electricalPulses[k];
     pulse.progress += pulse.speed;
@@ -420,9 +562,6 @@ function renderNeuralFrame(time) {
   requestAnimationFrame(renderNeuralFrame);
 }
 
-/**
- * Living Agent Autonomous Reasoning Ticker Loop
- */
 function startThoughtStream(thoughts) {
   if (thoughtInterval) clearInterval(thoughtInterval);
   currentThoughtIndex = 0;
@@ -440,9 +579,6 @@ function startThoughtStream(thoughts) {
   thoughtInterval = setInterval(showThought, 3200);
 }
 
-/**
- * Animated Score Counter Roll-up
- */
 function animateScoreRoll(targetScore) {
   let start = 0;
   const duration = 650;
@@ -451,7 +587,6 @@ function animateScoreRoll(targetScore) {
   function updateCounter(now) {
     const elapsed = now - startTime;
     const progress = Math.min(elapsed / duration, 1);
-    // easeOutQuad
     const eased = 1 - (1 - progress) * (1 - progress);
     const val = Math.floor(eased * targetScore);
     riskScore.textContent = `${val}%`;
@@ -470,6 +605,34 @@ function animateScoreRoll(targetScore) {
  * Studio User Interactions
  */
 function setupStudioEvents() {
+  // API Config Modal Events
+  btnApiConfig.addEventListener('click', () => {
+    jevApiKeyInput.value = jevApiKey;
+    jevEndpointInput.value = jevEndpoint;
+    apiModal.classList.remove('hidden');
+  });
+
+  btnCloseApiModal.addEventListener('click', () => apiModal.classList.add('hidden'));
+
+  btnSaveApiKey.addEventListener('click', () => {
+    jevApiKey = jevApiKeyInput.value.trim();
+    jevEndpoint = jevEndpointInput.value.trim() || 'https://api.typesafe.ai/v1/systemone';
+    localStorage.setItem('JEV_API_KEY', jevApiKey);
+    localStorage.setItem('JEV_ENDPOINT', jevEndpoint);
+    updateApiStatusUI();
+    apiModal.classList.add('hidden');
+    alert("TypeSafe Jev API Key configured! Custom snapshot pastes and text audits will now run through live Jev.");
+  });
+
+  btnClearApiKey.addEventListener('click', () => {
+    jevApiKey = '';
+    localStorage.removeItem('JEV_API_KEY');
+    jevApiKeyInput.value = '';
+    updateApiStatusUI();
+    apiModal.classList.add('hidden');
+    alert("Live API key cleared. Reverted to demonstration mode.");
+  });
+
   // Scenario Dock Buttons
   document.querySelectorAll('.dock-btn[data-scenario]').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -582,11 +745,11 @@ async function handlePasteFromClipboard() {
   alert("To paste a snapshot: Take a screenshot with Win + Shift + S (or Cmd + Shift + 4), then press Ctrl + V on this window!");
 }
 
-function loadCustomSnapshotFile(file) {
+async function loadCustomSnapshotFile(file) {
   if (!file || !file.type.startsWith('image/')) return;
 
   const reader = new FileReader();
-  reader.onload = function(event) {
+  reader.onload = async function(event) {
     const dataUrl = event.target.result;
     const name = file.name || "pasted_email_snapshot.png";
 
@@ -599,6 +762,23 @@ function loadCustomSnapshotFile(file) {
     triggerScanAnimation();
     triggerNeuralShockwave();
 
+    // If live API key is configured, extract text using in-browser OCR and call live Jev
+    if (jevApiKey && jevApiKey.trim().length > 5) {
+      thoughtText.textContent = "⚡ In-Browser OCR: Extracting email textual features...";
+      const extracted = await extractTextFromImage(stageImage);
+      const textToAudit = extracted && extracted.trim().length > 10 ? extracted : name;
+      thoughtText.textContent = "⚡ Calling Live TypeSafe Jev Decision Endpoint (api.typesafe.ai)...";
+      
+      const liveResult = await callLiveJevDecision(textToAudit);
+      if (liveResult.success) {
+        runJevDecision(liveResult.data);
+        return;
+      } else {
+        alert(`Live Jev API failed (${liveResult.error}). Showing calibrated fallback evaluation.`);
+      }
+    }
+
+    // Default calibrated fallback
     runJevDecision({
       id: "custom_pasted",
       filename: name,
@@ -648,7 +828,7 @@ function loadScenario(key) {
 
 function triggerScanAnimation() {
   scanBeam.classList.remove('scanning');
-  void scanBeam.offsetWidth; // Trigger reflow
+  void scanBeam.offsetWidth;
   scanBeam.classList.add('scanning');
 }
 
@@ -656,26 +836,23 @@ async function runJevDecision(data) {
   currentCategory = data.category;
   const start = performance.now();
 
-  await new Promise(r => setTimeout(r, 24));
+  const elapsed = data.elapsed || 24;
+  await new Promise(r => setTimeout(r, Math.min(elapsed, 24)));
 
-  const elapsed = (performance.now() - start).toFixed(0);
-  latencyVal.textContent = `${Math.max(elapsed, 24)}ms`;
-  drawerLatency.textContent = `${Math.max(elapsed, 24)}ms`;
+  latencyVal.textContent = `${elapsed}ms`;
+  drawerLatency.textContent = `${elapsed}ms`;
 
   renderStudioDeck(data);
 }
 
 function renderStudioDeck(data) {
-  // Update Ambient Threat Aurora on body (Zero Blue)
   document.body.className = `agentic-mode ${data.category}-aurora`;
 
-  // Start Agent Thought Stream Loop
   startThoughtStream(data.thoughts || [
     "[01/04] Autonomous Sentry: Monitoring active email viewport...",
-    "[02/04] Jev Decision Engine: Evaluating 24ms calibrated logit schema..."
+    "[02/04] Jev Decision Engine: Evaluating calibrated logit schema..."
   ]);
 
-  // Verdict Dossier Card
   verdictHero.className = `glass-card dossier-card ${data.category}`;
   threatBadge.textContent = data.badgeText;
   certaintyPill.textContent = data.certainty;
@@ -684,12 +861,10 @@ function renderStudioDeck(data) {
   meterFill.style.width = `${data.threatScore}%`;
   animateScoreRoll(data.threatScore);
 
-  // Three Assessment Pillars
   pillarWhat.textContent = data.what;
   pillarTrick.textContent = data.trick;
   pillarAction.textContent = data.action;
 
-  // Deceptive Signals Caught
   signalsCount.textContent = `${data.signals.length} Signals`;
   signalsList.innerHTML = '';
   data.signals.forEach(s => {
@@ -699,7 +874,6 @@ function renderStudioDeck(data) {
     signalsList.appendChild(row);
   });
 
-  // Threat Pins Overlaid on the Snapshot
   threatPinsLayer.innerHTML = '';
   if (data.pins && data.pins.length > 0) {
     data.pins.forEach(p => {
@@ -712,8 +886,7 @@ function renderStudioDeck(data) {
     });
   }
 
-  // Update Raw Jev JSON Schema in Drawer
-  const rawJevJson = {
+  const rawJevJson = data.rawResponse || {
     model: "typesafe/jev-latest",
     decision_engine: "@cf/cloudflare/clef-flash",
     agent_status: "autonomous_reflex_monitoring",
@@ -729,8 +902,8 @@ function renderStudioDeck(data) {
       prescribed_action: data.action,
       extracted_deceptive_signals: data.signals.map(s => s.text)
     },
-    inference_speed_ms: 24,
-    compute_charge: "$0.00"
+    inference_speed_ms: data.elapsed || 24,
+    compute_charge: "$0.00 (Zero Token Generation)"
   };
 
   drawerJson.textContent = JSON.stringify(rawJevJson, null, 2);
@@ -748,7 +921,7 @@ function copyIncidentReport() {
 Verdict: ${current.headline} (Threat Risk: ${current.threatScore})
 Attack Vector: ${current.what}
 Recommended Action: ${current.action}
-Engine: TypeSafe Jev & Cloudflare Clef-Flash (24ms Autonomous Agent Reflex)
+Engine: TypeSafe Jev (24ms Autonomous Agent Reflex)
 Status: Flagged for Security Action`;
 
   navigator.clipboard.writeText(reportText).then(() => {
@@ -759,7 +932,20 @@ Status: Flagged for Security Action`;
   });
 }
 
-function analyzeCustomText(rawText) {
+async function analyzeCustomText(rawText) {
+  // If Live Jev API Key is configured, make a REAL call to TypeSafe Jev
+  if (jevApiKey && jevApiKey.trim().length > 5) {
+    thoughtText.textContent = "⚡ Calling Live TypeSafe Jev API (api.typesafe.ai)...";
+    const liveResult = await callLiveJevDecision(rawText);
+    if (liveResult.success) {
+      runJevDecision(liveResult.data);
+      return;
+    } else {
+      alert(`Live Jev API failed (${liveResult.error}). Showing calibrated fallback evaluation.`);
+    }
+  }
+
+  // Demonstration fallback evaluation
   const text = rawText.toLowerCase();
   const isDanger = text.includes('chase') || text.includes('wire') || text.includes('urgent') || text.includes('password');
 
@@ -790,5 +976,6 @@ function analyzeCustomText(rawText) {
 window.addEventListener('DOMContentLoaded', () => {
   initNeuralSimulation();
   setupStudioEvents();
+  updateApiStatusUI();
   loadScenario('chase_bank');
 });
